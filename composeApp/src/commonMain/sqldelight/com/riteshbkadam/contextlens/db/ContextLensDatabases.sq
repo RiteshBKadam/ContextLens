@@ -1,0 +1,76 @@
+CREATE TABLE IF NOT EXISTS Projects (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+insertProject:
+INSERT OR IGNORE INTO Projects(name) VALUES (?);
+
+getProjectNameByProjectId:
+SELECT name FROM Projects WHERE id=?;
+
+deleteProjectById:
+DELETE FROM Projects
+WHERE id = ?;
+
+
+CREATE TABLE IF NOT EXISTS Files (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    projectId INTEGER NOT NULL REFERENCES Projects(id),
+    name TEXT NOT NULL UNIQUE,
+    createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+getFileNameByFileId:
+SELECT name FROM Files WHERE id=?;
+
+getLastInsertedFileId:
+SELECT id FROM Files WHERE projectId=? ORDER BY createdAt DESC LIMIT 1;
+
+updateProjectId:
+UPDATE Files
+SET projectId=?
+WHERE projectId=?;
+
+insertFile:
+INSERT OR IGNORE INTO Files (projectId, name) VALUES (?, ?);
+
+CREATE TABLE IF NOT EXISTS Snippets (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    fileId INTEGER NOT NULL REFERENCES Files(id),
+    content TEXT NOT NULL,
+    language TEXT,
+    copiedAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+insertSnippet:
+INSERT INTO Snippets (fileId, content, language) VALUES (?, ?, ?);
+
+getAllProjects:
+SELECT * FROM Projects ORDER BY createdAt DESC;
+
+getFilesByProjectId:
+SELECT * FROM Files WHERE projectId = ? ORDER BY createdAt DESC;
+
+getSnippetsByFileId:
+SELECT content FROM Snippets WHERE fileId = ? ORDER BY copiedAt DESC;
+
+getProjectId:
+SELECT id FROM Projects WHERE name= ?;
+
+getFileId:
+SELECT id FROM Files WHERE projectId=?;
+
+deleteAllProjects:
+DELETE FROM Projects;
+
+deleteAllFiles:
+DELETE FROM Files;
+
+deleteAllSnippets:
+DELETE FROM Snippets;
+
+getProjectIdFromFileId:
+SELECT projectId FROM Files WHERE id=?;
+
