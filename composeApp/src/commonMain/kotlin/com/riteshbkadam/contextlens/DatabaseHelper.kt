@@ -52,6 +52,9 @@ class DatabaseHelper(
     suspend fun getFileId(projectId: Long) = withContext(Dispatchers.IO) {
         db.getFileId(projectId).executeAsList()
     }
+    suspend fun getFileIdByFileName(name: String,projectId: Long) = withContext(Dispatchers.IO) {
+        db.getFileIdByFileName(name, projectId).executeAsOneOrNull()
+    }
     suspend fun getFileNameByFileId(fileID : Long) = withContext(Dispatchers.IO) {
         db.getFileNameByFileId(fileID).executeAsOne()
     }

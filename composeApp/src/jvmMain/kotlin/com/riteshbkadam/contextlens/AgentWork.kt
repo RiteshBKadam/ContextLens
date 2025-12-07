@@ -28,7 +28,6 @@ suspend fun CoroutineScope.agentWork(
             )
 
             val meta = parseMetadata(result)
-            println(meta.toString())
             if(meta.projectName.contentEquals("KCTAFVW")){
                 onAlert("Kindly copy the text again with active focused window")
             }
@@ -36,7 +35,6 @@ suspend fun CoroutineScope.agentWork(
 
             val projectId = dbHelper.getProjectId(meta.projectName)
             val fileIds = projectId?.let { dbHelper.getFileId(it) }
-            println(projectId?.let { dbHelper.getFilesByProjectId(it) })
             if (fileIds != null) {
                 for(fileID in fileIds){
                     val existingProjectName=dbHelper.getProjectNameByFileId(fileID)
@@ -49,7 +47,6 @@ suspend fun CoroutineScope.agentWork(
             val savedName = projectId?.let { dbHelper.getProjectNameByProjectId(it) }
 
             if (savedName == meta.projectName) {
-                println("found existing project")
                 var bestFileId: Long? = null
                 var bestScore = 0.0
 
@@ -58,9 +55,12 @@ suspend fun CoroutineScope.agentWork(
                     for (fid in fileIds) {
                         println(fid)
                         val snippets = dbHelper.getSnippetsByFileId(fid)
-                        val score = client.getSimilarityScore(text, snippets.toString())
-                        println("hit for ${dbHelper.getFileNameByFileId(fid)}")
-                        println("score for this is $score")
+                        var score=0.0
+                        try{
+                            score= client.getSimilarityScore(text, snippets.toString())
+                        }catch (e:Exception){
+                            println(e)
+                        }
                         if (score > bestScore) {
                             bestScore = score
                             bestFileId = fid
@@ -70,35 +70,33 @@ suspend fun CoroutineScope.agentWork(
 
                 if (bestScore >= 0.55 && meta.fileTitle==dbHelper.getFileNameByFileId(bestFileId!!)) {
                     dbHelper.insertSnippet(bestFileId, text, meta.language)
-                    println("inserted in existing file")
-                    println(dbHelper.getFileNameByFileId(bestFileId))
+                    println("inserted in project ${dbHelper.getProjectNameByProjectId(projectId)} and in file ${dbHelper.getFileNameByFileId(bestFileId)}")
                     onAlert("Success")
 
                 } else {
                     dbHelper.insertFile(projectId, meta.fileTitle)
-                    val newFileId = dbHelper.getLastInsertedFileIdInProject(projectId)
-                    println("new file created $newFileId")
+                    val newFileId = dbHelper.getFileIdByFileName(meta.fileTitle,projectId)
                     if (newFileId != null) {
                         dbHelper.insertSnippet(newFileId, text, meta.language)
-                    }
-                    println("inserted in new file and id is $newFileId")
-                    onAlert("Success")
+                        println("inserted in project ${dbHelper.getProjectNameByProjectId(projectId)} and in file ${dbHelper.getFileNameByFileId(newFileId)}")
 
+                    }
+                    onAlert("Success")
                 }
 
             } else {
-                println("created new project")
                 dbHelper.insertProject(meta.projectName)
 
                 val newProjectId = dbHelper.getProjectId(meta.projectName)
                 if (newProjectId != null) {
                     dbHelper.insertFile(newProjectId, meta.fileTitle)
-                    val fileId = dbHelper.getLastInsertedFileIdInProject(newProjectId)
+                    val fileId = dbHelper.getFileIdByFileName(meta.fileTitle,newProjectId)
                     if (fileId != null) {
                         dbHelper.insertSnippet(fileId, text, meta.language)
+                        println("inserted in project ${dbHelper.getProjectNameByProjectId(newProjectId)} and in file ${dbHelper.getFileNameByFileId(fileId)}")
+
                     }
                 }
-                println("inserted in new project")
                 onAlert("Success")
 
             }

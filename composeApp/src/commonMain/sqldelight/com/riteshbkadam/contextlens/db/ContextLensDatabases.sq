@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS Files (
 getFileNameByFileId:
 SELECT name FROM Files WHERE id=?;
 
+getFileIdByFileName:
+SELECT id FROM Files WHERE name=? AND projectId=? ORDER BY createdAt DESC LIMIT 1;
+
 getLastInsertedFileId:
 SELECT id FROM Files WHERE projectId=? ORDER BY createdAt DESC LIMIT 1;
 
