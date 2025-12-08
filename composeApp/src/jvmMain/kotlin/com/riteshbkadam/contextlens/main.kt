@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.riteshbkadam.contextlens.db.Projects
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlin.collections.emptyList
 import kotlin.collections.mutableListOf
 import kotlin.math.exp
 
@@ -40,13 +42,26 @@ fun main() = application {
         ) {
             var history by remember { mutableStateOf(listOf<String>()) }
             var alertMessege by remember { mutableStateOf("") }
-            var projectTitle by remember { mutableStateOf("") }
-            var allProjects by remember { mutableStateOf(mutableListOf<Projects>())}
+            var selectedProject by remember { mutableStateOf("") }
+            var currentOpenedProject by remember { mutableStateOf("") }
+            val allProjects = remember { mutableStateListOf<String>() }
+            val projects by dbHelper.getAllProjects().collectAsState(initial = emptyList<Flow<Projects>>())
 
-            LaunchedEffect(Unit){
-                allProjects= dbHelper.getAllProjects() as MutableList<Projects>
+            var allFiles by remember { mutableStateOf(mutableListOf(emptyList<String>())) }
 
-                windowIntrospector.readActiveWindow().fileName.contains()
+            LaunchedEffect(projects){
+                val activeFile = windowIntrospector.readActiveWindow().fileName
+                dbHelper.getAllProjects().collect { project ->
+                    if (!allProjects.contains(project.name)) {
+                        allProjects.add(project.name)
+                    }
+                    if (activeFile?.contains(project.name) == true) {
+                        currentOpenedProject = project.name
+                    }
+                }
+
+                allFiles=
+
             }
 
             LaunchedEffect(Unit) {
@@ -64,36 +79,55 @@ fun main() = application {
             var exp by remember { mutableStateOf(false) }
             MaterialTheme {
                 Scaffold(){
-                    Row(modifier = Modifier.fillMaxWidth()
-                        .height(100.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly){
-                       Column(verticalArrangement = Arrangement.SpaceEvenly,
-                           modifier = Modifier.fillMaxHeight()){
-                           Text(
-                               text = projectTitle.ifEmpty { "Select Project"},
-                               modifier = Modifier
-                                   .clickable { exp = true },
-                               fontSize = 17.sp
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                                .height(100.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Column(
+                                verticalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier.fillMaxHeight()
+                            ) {
+                                Text(
+                                    text = selectedProject.ifEmpty { "Select Project" },
+                                    modifier = Modifier
+                                        .clickable { exp = true },
+                                    fontSize = 17.sp
 
-                           )
-                           DropdownMenu(expanded = exp,
-                               onDismissRequest = {exp=false},
-                               modifier = Modifier.wrapContentHeight()
-                                   .wrapContentWidth()
-                               ) {
-                               allProjects.forEach {project ->
-                                   DropdownMenuItem(
-                                       text = { Text(text =project.name) },
-                                       onClick = {
-                                           projectTitle= project.name
-                                                 exp=false
-                                                 },
-                                   )
+                                )
+
+                                DropdownMenu(
+                                    expanded = exp,
+                                    onDismissRequest = { exp = false },
+                                    modifier = Modifier.wrapContentHeight()
+                                        .wrapContentWidth()
+                                ) {
+                                    allProjects.forEach { project ->
+                                        DropdownMenuItem(
+                                            text = { Text(text = project) },
+                                            onClick = {
+                                                selectedProject = project
+                                                exp = false
+                                            },
+                                        )
+                                    }
+                                }
+                                Text("Files", fontSize = 17.sp)
+                            }
+                            Text("Snippets", fontSize = 17.sp)
+                        }
+                        Row{
+                            //FileList
+                           LazyColumn{
+                               items(allFiles){
+
                                }
-                           }
-                           Text("Files", fontSize = 17.sp)
-                       }
-                        Text("Snippets", fontSize = 17.sp)
+                                
+                            }
+                            //SnippetList
+                            Column {  }
+                        }
                     }
                 }
             }

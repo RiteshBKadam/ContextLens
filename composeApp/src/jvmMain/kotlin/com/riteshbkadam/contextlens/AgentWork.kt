@@ -44,6 +44,7 @@ suspend fun CoroutineScope.agentWork(
                     }
                 }
             }
+
             val savedName = projectId?.let { dbHelper.getProjectNameByProjectId(it) }
 
             if (savedName == meta.projectName) {

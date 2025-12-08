@@ -55,6 +55,7 @@ kotlin {
             implementation("com.google.code.gson:gson:2.11.0")
             implementation("com.squareup.sqldelight:sqlite-driver:1.5.5")
             implementation("app.cash.sqldelight:sqlite-driver:2.0.2")
+            implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
             implementation("androidx.collection:collection:1.4.0")
             implementation("com.google.code.gson:gson:2.11.0")
             implementation("org.json:json:20231013")

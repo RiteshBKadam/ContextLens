@@ -2,7 +2,11 @@ package com.riteshbkadam.contextlens
 
 import app.cash.sqldelight.db.SqlDriver
 import com.riteshbkadam.contextlens.db.ContextLensDatabase
+import com.riteshbkadam.contextlens.db.Projects
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 
 class DatabaseHelper(
@@ -31,8 +35,8 @@ class DatabaseHelper(
         }
 
     // 🔵 Get all projects
-    suspend fun getAllProjects() = withContext(Dispatchers.IO) {
-        db.getAllProjects().executeAsList()
+    fun getAllProjects(): Flow<Projects>{
+        return db.getAllProjects().executeAsList().asFlow()
     }
 
     // 🔵 Get files by project ID
