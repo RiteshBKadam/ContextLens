@@ -14,8 +14,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.riteshbkadam.contextlens.db.Files
 import com.riteshbkadam.contextlens.db.Projects
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +37,7 @@ fun main() = application {
     ) {
         val windowIntrospector = JvmWindowIntrospector()
         val dbHelper = DatabaseHelper(createDriver())
-        val client = JavaGeminiClient("API")
+        val client = JavaGeminiClient("AIzaSyDHhkFXN3aBeeC0YjpGE9Anma_2LvPNoOM")
 
         Column(
             modifier = Modifier
@@ -47,8 +53,7 @@ fun main() = application {
             val allProjects = remember { mutableStateListOf<String>() }
             val projects by dbHelper.getAllProjects().collectAsState(initial = emptyList<Flow<Projects>>())
 
-            var allFiles by remember { mutableStateOf(mutableListOf(emptyList<String>())) }
-
+            var allFiles=emptyList<Files>()
             LaunchedEffect(projects){
                 val activeFile = windowIntrospector.readActiveWindow().fileName
                 dbHelper.getAllProjects().collect { project ->
@@ -57,10 +62,12 @@ fun main() = application {
                     }
                     if (activeFile?.contains(project.name) == true) {
                         currentOpenedProject = project.name
+                        dbHelper.getProjectId(currentOpenedProject)?.let { allFiles=dbHelper.getFilesByProjectId(it) }
+
                     }
                 }
 
-                allFiles=
+
 
             }
 
@@ -82,21 +89,24 @@ fun main() = application {
                     Column {
                         Row(
                             modifier = Modifier.fillMaxWidth()
-                                .height(100.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                                .height(100.dp)
+                                .background(Color.Gray),
                         ) {
                             Column(
                                 verticalArrangement = Arrangement.SpaceEvenly,
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.fillMaxHeight()
+                                    .weight(0.3f)
                             ) {
                                 Text(
                                     text = selectedProject.ifEmpty { "Select Project" },
                                     modifier = Modifier
+                                        .pointerHoverIcon(PointerIcon.Hand)
                                         .clickable { exp = true },
-                                    fontSize = 17.sp
+                                    fontSize = 17.sp,
+                                    textDecoration = TextDecoration.Underline
 
                                 )
-
                                 DropdownMenu(
                                     expanded = exp,
                                     onDismissRequest = { exp = false },
@@ -113,20 +123,50 @@ fun main() = application {
                                         )
                                     }
                                 }
+
                                 Text("Files", fontSize = 17.sp)
                             }
-                            Text("Snippets", fontSize = 17.sp)
-                        }
-                        Row{
-                            //FileList
-                           LazyColumn{
-                               items(allFiles){
 
-                               }
-                                
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxHeight()
+                                    .fillMaxWidth()
+                                    .background(Color.Black)
+                                    .weight(0.7f)
+                            ) {
+                                Text("Snippets", fontSize = 17.sp, color = Color.White)
+
+
                             }
-                            //SnippetList
-                            Column {  }
+                        }
+                        Row {
+                            Column(
+                                verticalArrangement = Arrangement.SpaceEvenly,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxHeight()
+                                    .weight(0.3f)
+                            ) {
+                                LazyColumn {
+                                    items(allFiles) { file ->
+                                        Text(file.name)
+                                        Spacer(Modifier.height(10.dp))
+                                    }
+
+                                }
+                            }
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxHeight()
+                                    .fillMaxWidth()
+                                    .background(Color.Black)
+                                    .weight(0.7f)
+                            ) {
+                                Text("SnippetsList", fontSize = 17.sp, color = Color.White)
+
+
+                            }
                         }
                     }
                 }
