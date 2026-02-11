@@ -37,7 +37,7 @@ fun main() = application {
     ) {
         val windowIntrospector = JvmWindowIntrospector()
         val dbHelper = DatabaseHelper(createDriver())
-        val client = JavaGeminiClient("AIzaSyDHhkFXN3aBeeC0YjpGE9Anma_2LvPNoOM")
+        val client = JavaGeminiClient("API")
 
         Column(
             modifier = Modifier
