@@ -48,19 +48,20 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
-            implementation("io.ktor:ktor-client-cio:2.3.4")
-            implementation("net.java.dev.jna:jna:5.14.0")
-            implementation("net.java.dev.jna:jna-platform:5.14.0")
-            implementation("com.squareup.okhttp3:okhttp:4.12.0")
-            implementation("com.google.code.gson:gson:2.11.0")
-            implementation("com.squareup.sqldelight:sqlite-driver:1.5.5")
-            implementation("app.cash.sqldelight:sqlite-driver:2.0.2")
-            implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
-            implementation("androidx.collection:collection:1.4.0")
-            implementation("com.google.code.gson:gson:2.11.0")
-            implementation("org.json:json:20231013")
-            implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
-            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
+            implementation(libs.ktor.client.cio)
+            implementation("net.java.dev.jna:jna:5.18.1")
+            implementation(libs.jna.platform)
+            implementation(libs.okhttp)
+            implementation("com.google.code.gson:gson:2.13.2")
+            implementation(libs.sqlite.driver)
+            implementation(libs.sqldelight.sqlite.driver)
+            implementation(libs.coroutines.extensions)
+            implementation(libs.androidx.collection)
+            implementation("com.google.code.gson:gson:2.13.2")
+            implementation("org.json:json:20251224")
+            implementation("com.fasterxml.jackson.core:jackson-databind:2.21.0")
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.21.0")
+
         }
     }
 }

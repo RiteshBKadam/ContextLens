@@ -82,7 +82,7 @@ suspend fun CoroutineScope.agentWork(
                         println("inserted in project ${dbHelper.getProjectNameByProjectId(projectId)} and in file ${dbHelper.getFileNameByFileId(newFileId)}")
 
                     }
-                    onAlert("Success")
+                    onAlert("NFA")
                 }
 
             } else {

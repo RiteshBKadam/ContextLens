@@ -1,11 +1,17 @@
 package com.riteshbkadam.contextlens
 
+import app.cash.sqldelight.Query
 import app.cash.sqldelight.db.SqlDriver
 import com.riteshbkadam.contextlens.db.ContextLensDatabase
+import com.riteshbkadam.contextlens.db.Files
 import com.riteshbkadam.contextlens.db.Projects
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 
@@ -40,9 +46,25 @@ class DatabaseHelper(
     }
 
     // 🔵 Get files by project ID
-    suspend fun getFilesByProjectId(projectId: Long) = withContext(Dispatchers.IO) {
-        db.getFilesByProjectId(projectId).executeAsList()
+    fun getFilesByProjectId(projectId: Long): Flow<List<Files>> = callbackFlow {
+
+        val query = db.getFilesByProjectId(projectId)
+
+        // Emit initial value
+        trySend(query.executeAsList())
+
+        val listener = Query.Listener {
+            trySend(query.executeAsList())
+        }
+
+        query.addListener(listener)
+
+        awaitClose {
+            query.removeListener(listener)
+        }
     }
+
+
 
     // 🔵 Get snippets by file ID
     suspend fun getSnippetsByFileId(fileId: Long) = withContext(Dispatchers.IO) {
