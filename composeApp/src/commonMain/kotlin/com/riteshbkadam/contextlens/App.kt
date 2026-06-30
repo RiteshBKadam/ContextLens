@@ -1,5 +1,7 @@
 package com.riteshbkadam.contextlens
-//TESTING BRANCH3
+
+//TESTING BRANCH2
+>>>>>>> 28a8ef1d4844cfa853b275addf8eb7b18f0b71c2
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
